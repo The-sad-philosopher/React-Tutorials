@@ -1,34 +1,38 @@
 import React, { Component } from 'react';
+import SeasonDisplay from './Components/SeasonDisplay/SeasonDisplay';
+import Loader from './Components/Loader';
+import Error from './Components/Error/Error';
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      latitude: undefined,
-      errorMessage: '',
-    };
+  state = { latitude: undefined, errorMessage: '' };
+
+  componentDidMount() {
     window.navigator.geolocation.getCurrentPosition(
-      (location) => {
+      (location) =>
         this.setState({
           latitude: location.coords.latitude,
-        });
-      },
-      (err) => {
+        }),
+      (err) =>
         this.setState({
           errorMessage: err.message,
-        });
-      }
+        })
     );
   }
-  render() {
+
+  renderContent = () => {
     const { latitude, errorMessage } = this.state;
+    let contentToBeRendered = <Loader message="Waiting for location..." />;
     if (errorMessage && !latitude) {
-      return <div>Error: {errorMessage}</div>;
+      contentToBeRendered = <Error message="Location denied." />;
     }
     if (!errorMessage && latitude) {
-      return <div> Latitude : {latitude}</div>;
+      contentToBeRendered = <SeasonDisplay latitude={latitude} />;
     }
-    return <div>Loading...</div>;
+    return contentToBeRendered;
+  };
+
+  render() {
+    return <div>{this.renderContent()}</div>;
   }
 }
 
